@@ -1,0 +1,59 @@
+worker_processes  1;
+error_log logs/error.log debug;
+events {
+    worker_connections 1024;
+}
+user root root;
+http {
+
+    server {
+        listen 127.0.0.1:5030;
+
+        location / {
+            return 503 'Service Temporarily Unavailable';
+            add_header Content-Type text/plain;
+        }
+    }
+
+    server {
+        listen 80;
+
+        resolver {{keyOrDefault "general/CONSUL_DNS_IP_PORT" "172.17.0.1:53"}};
+
+        location = /status {
+            return 200 'Ok!';
+            add_header Content-Type text/plain;
+        }
+
+        location / {
+            default_type text/html;
+            content_by_lua '
+                local headers = ngx.req.get_headers()
+                ngx.say("<h2>obscurestackgenerator API Gateway</h2>")
+                ngx.say("<p>Currently registered microservices:</p>")
+                ngx.say("<table border=1><thead><td>Microservice</td><td>URL</td></thead><tbody>")
+                {{range services}}
+                ngx.say("<tr><td>{{.Name}}</td><td>"..headers["Host"].."/{{.Name | replaceAll "service-" "" }}</td></tr>")
+                {{end}}
+                ngx.say("</tbody></table>")
+            ';
+        }
+
+        {{range services}}
+        location ~ "^/{{ .Name | replaceAll "service-" "" }}/(.+)$" {
+            # CORS stuff
+            add_header 'Access-Control-Allow-Origin' "*" always;
+            add_header 'Access-Control-Allow-Credentials' 'true' always;
+            add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
+            add_header 'Access-Control-Allow-Headers' 'Accept,Authorization,Cache-Control,Content-Type,DNT,If-Modified-Since,Keep-Alive,Origin,User-Agent,X-Requested-With,X-Http-Method-Override,X-Auth-Token' always;
+
+            proxy_pass http://{{.Name}}/$1$is_args$args;
+            proxy_redirect http://{{ .Name}}.service.consul/ http://$host/{{ .Name | replaceAll "service-" "" }}/;
+            proxy_set_header Host {{.Name}}.service.consul;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Host $server_name;
+        }
+        {{end}}
+    }
+}

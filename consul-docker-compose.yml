@@ -1,0 +1,42 @@
+version: "2"
+networks:
+    docker_container_network:
+        external:
+            name: docker_container_network
+services:
+    consul:
+        image: consul:latest
+        container_name: consul
+        hostname: consul
+        networks:
+            docker_container_network:
+                aliases:
+                    - consul
+        ports:
+            - "8300"
+            - "8400"
+            - "8500"
+            - "8500:8500"
+            - "53:8600/udp"
+        environment:
+            - SERVICE_8300_IGNORE=true
+            - SERVICE_8400_IGNORE=true
+            - SERVICE_8600_IGNORE=true
+            - SERVICE_8301_IGNORE=true
+            - SERVICE_8302_IGNORE=true
+            - SERVICE_8500_NAME=consul
+        command: consul agent -server -bootstrap -ui -data-dir=/consul/data -client=0.0.0.0
+    registrator:
+        image: gliderlabs/registrator:v7
+        hostname: registrator
+        networks:
+            docker_container_network:
+                aliases:
+                    - consul
+        depends_on:
+            - consul
+        links:
+            - consul
+        volumes:
+            - "/var/run/docker.sock:/tmp/docker.sock"
+        command: -internal consul://172.18.0.1:8500

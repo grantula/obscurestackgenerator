@@ -1,0 +1,83 @@
+worker_processes  1;
+error_log logs/error.log;
+events {
+    worker_connections 1024;
+}
+http {
+
+    {{range services}}{{if .Name | contains "obscurestackgenerator-pages"}}
+    upstream {{.Name}} {
+        least_conn;
+        {{range service .Name}}
+        server {{.Address}}:{{.Port}};{{else}}server 127.0.0.1:5030;{{end}}
+    }
+    {{end}}{{if .Name | contains "obscurestackgenerator-staticassets"}}
+    upstream {{.Name}} {
+        least_conn;
+        {{range service .Name}}
+        server {{.Address}}:{{.Port}};{{else}}server 127.0.0.1:5030;{{end}}
+    }
+    {{end}}{{end}}
+
+    server {
+        listen 127.0.0.1:5030;
+
+        location / {
+            return 503 'Service Temporarily Unavailable';
+            add_header Content-Type text/plain;
+        }
+    }
+
+    server {
+        listen 80;
+
+        resolver {{keyOrDefault "general/CONSUL_DNS_IP_PORT" "172.17.0.1:53"}};
+
+        location = /status {
+            return 200 'Ok!';
+            add_header Content-Type text/plain;
+        }
+
+        location ~ "^/(.*)$" {
+            {{ if keyExists "obscurestackgenerator/redirect_alb_http_to_https" }}
+            if ($http_x_forwarded_proto != "https") {
+                rewrite ^(.*)$ {{ key "obscurestackgenerator/WEB_URL" }};
+            }
+            {{ end }}
+            proxy_pass http://obscurestackgenerator-pages/$1;
+            proxy_redirect http://obscurestackgenerator-pages.service.consul/ http://$host/;
+            proxy_set_header Host obscurestackgenerator-pages.service.consul;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Host $server_name;
+        }
+
+        location ^~ /static {
+            {{ if keyExists "obscurestackgenerator/redirect_alb_http_to_https" }}
+            if ($http_x_forwarded_proto != "https") {
+                rewrite ^(.*)$ {{ key "obscurestackgenerator/WEB_URL" }};
+            }
+            {{ end }}
+            proxy_pass http://obscurestackgenerator-staticassets$request_uri;
+            proxy_redirect http://obscurestackgenerator-staticassets.service.consul/ http://$host/static/;
+            proxy_set_header Host obscurestackgenerator-staticassets.service.consul;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Host $server_name;
+        }
+
+        location ^~ /robots.txt {
+            {{ if keyExists "obscurestackgenerator/redirect_alb_http_to_https" }}
+            if ($http_x_forwarded_proto != "https") {
+                rewrite ^(.*)$ {{ key "obscurestackgenerator/WEB_URL" }};
+            }
+            {{ end }}
+            proxy_pass http://obscurestackgenerator-staticassets$request_uri;
+            proxy_redirect http://obscurestackgenerator-staticassets.service.consul/ http://$host/static/;
+            proxy_set_header Host obscurestackgenerator-staticassets.service.consul;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Host $server_name;
+        }
+    }
+}

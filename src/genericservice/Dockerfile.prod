@@ -1,0 +1,3 @@
+FROM vagrant_genericservice
+
+COPY src /usr/src

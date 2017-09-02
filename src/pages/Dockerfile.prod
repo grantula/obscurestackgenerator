@@ -1,0 +1,6 @@
+FROM vagrant_pages
+
+COPY src/pages /usr/src/pages
+
+ARG CONTAINER_VERSION=0.0.0
+ENV CONTAINER_VERSION=$CONTAINER_VERSION

@@ -1,0 +1,134 @@
+version: "2"
+networks:
+    docker_container_network:
+        external:
+            name: docker_container_network
+services:
+    obscurestackgenerator-apigateway:
+        build:
+            context: .
+            dockerfile: src/apigateway/Dockerfile
+        networks:
+            docker_container_network:
+                aliases:
+                    - consul
+        dns: 172.18.0.1
+        ports:
+            - "8081:80"
+        expose:
+            - "80"
+        volumes:
+            - /vagrant/src/apigateway:/usr/src/apigateway
+        environment:
+            - PYTHONUNBUFFERED=0
+            - PYTHONPATH=/usr/src
+            - CONSUL_ADDRESS=consul:8500
+        labels:
+            - SERVICE_80_CHECK_HTTP=/status
+            - SERVICE_80_CHECK_INTERVAL=5s
+            - SERVICE_80_CHECK_TIMEOUT=5s
+            - SERVICE_80_NAME=obscurestackgenerator-apigateway
+            - SERVICE_80_TAGS=primary
+        command: ["python", "/usr/src/apigateway/init.py"]
+    obscurestackgenerator-webgateway:
+        build:
+            context: .
+            dockerfile: src/webgateway/Dockerfile
+        networks:
+            docker_container_network:
+                aliases:
+                    - consul
+        dns: 172.18.0.1
+        ports:
+            - "8080:80"
+        expose:
+            - "80"
+        volumes:
+            - /vagrant/src/webgateway:/usr/src/webgateway
+        environment:
+            - PYTHONUNBUFFERED=0
+            - PYTHONPATH=/usr/src
+            - CONSUL_ADDRESS=consul:8500
+        labels:
+            - SERVICE_80_CHECK_HTTP=/status
+            - SERVICE_80_CHECK_INTERVAL=5s
+            - SERVICE_80_CHECK_TIMEOUT=5s
+            - SERVICE_80_NAME=obscurestackgenerator-webgateway
+        command: ["python", "/usr/src/webgateway/init.py"]
+    obscurestackgenerator-pages:
+        build:
+            context: .
+            dockerfile: src/pages/Dockerfile
+        networks:
+            docker_container_network:
+                aliases:
+                    - consul
+        dns: 172.18.0.1
+        ports:
+            - "80"
+        expose:
+            - "80"
+        volumes:
+            - /vagrant/src/pages:/usr/src/pages
+        environment:
+            - PYTHONUNBUFFERED=0
+            - PYTHONPATH=/usr/src
+            - CONSUL_ADDRESS=consul:8500
+            - FLASK_DEBUG=False
+            - FLASK_PREFERRED_URL_SCHEME=http
+            - CONTAINER_VERSION=6.6.6
+        labels:
+            - SERVICE_80_CHECK_HTTP=/status
+            - SERVICE_80_CHECK_INTERVAL=5s
+            - SERVICE_80_CHECK_TIMEOUT=5s
+            - SERVICE_80_NAME=obscurestackgenerator-pages
+        command: ["python", "/usr/src/pages/init.py"]
+    obscurestackgenerator-staticassets:
+        build:
+            context: .
+            dockerfile: src/staticassets/Dockerfile
+        networks:
+            docker_container_network:
+                aliases:
+                    - consul
+        dns: 172.18.0.1
+        ports:
+            - "80"
+        expose:
+            - "80"
+        volumes:
+            - /vagrant/src/staticassets:/usr/src/staticassets
+        environment:
+            - PYTHONUNBUFFERED=0
+            - PYTHONPATH=/usr/src
+            - CONSUL_ADDRESS=consul:8500
+            - CONTAINER_VERSION=6.6.6
+        labels:
+            - SERVICE_80_CHECK_HTTP=/status
+            - SERVICE_80_CHECK_INTERVAL=5s
+            - SERVICE_80_CHECK_TIMEOUT=5s
+            - SERVICE_80_NAME=obscurestackgenerator-staticassets
+        command: ["python", "/usr/src/staticassets/init.py"]
+    service-genericservice:
+        build:
+            context: .
+            dockerfile: src/genericservice/Dockerfile
+        networks:
+            docker_container_network:
+                aliases:
+                    - consul
+        dns: 172.18.0.1
+        expose:
+            - "80"
+        volumes:
+            - /vagrant/src/genericservice:/usr/src/genericservice
+        environment:
+            - PYTHONUNBUFFERED=0
+            - PYTHONPATH=/usr/src
+            - CONSUL_ADDRESS=consul:8500
+        labels:
+            - SERVICE_80_NAME=service-genericservice
+            - SERVICE_80_CHECK_HTTP=/status
+            - SERVICE_80_CHECK_INTERVAL=5s
+            - SERVICE_80_CHECK_TIMEOUT=5s
+        command: ["python", "/usr/src/genericservice/init.py"]

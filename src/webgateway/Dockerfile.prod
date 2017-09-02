@@ -1,0 +1,6 @@
+FROM vagrant_webgateway
+
+COPY src/webgateway /usr/src/webgateway
+
+ARG CONTAINER_VERSION=0.0.0
+ENV CONTAINER_VERSION=$CONTAINER_VERSION

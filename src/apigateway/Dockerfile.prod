@@ -1,0 +1,6 @@
+FROM vagrant_apigateway
+
+COPY src/apigateway /usr/src/apigateway
+
+ARG CONTAINER_VERSION=0.0.0
+ENV CONTAINER_VERSION=$CONTAINER_VERSION

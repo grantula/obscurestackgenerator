@@ -1,0 +1,11 @@
+*.swp
+.vagrant
+*.out
+*.pyc
+*.swo
+.vault_keys
+log.txt
+log/*
+terraform/.terraform/*
+terraform/plan
+terraform/terraform.tfstate.backup

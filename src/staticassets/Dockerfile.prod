@@ -1,0 +1,6 @@
+FROM vagrant_staticassets
+
+COPY src/staticassets /usr/src/staticassets
+
+ARG CONTAINER_VERSION=0.0.0
+ENV CONTAINER_VERSION=$CONTAINER_VERSION

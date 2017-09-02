@@ -1,0 +1,65 @@
+{#
+Filename: pages/pages/core/base_layout.jinja.html
+Author(s): Grant W
+#}
+<html>
+<head>
+<title>Obscure Stack Generator</title>
+<link rel="shortcut icon" href="/static/core/images/stack.ico">
+
+<!-- CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+{% block custom_css %}{% endblock %}
+
+<!-- JS -->
+<script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s=" crossorigin="anonymous"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular-sanitize.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/1.1.2/ui-bootstrap-tpls.min.js"></script>
+
+<!-- Angular Components -->
+<script src="/static/core/core.module.js"></script>
+<script src="/static/home/home.module.js"></script>
+<script src="/static/core/core.service.js"></script>
+<script src="/static/core/core.controller.js"></script>
+<script src="/static/core/apigateway.service.js"></script>
+<script src="/static/home/home.controller.js"></script>
+
+
+{% block js_dependencies %}{% endblock %}
+
+<script src="/static/consul_config.js"></script>
+
+<script>
+
+var env = {};
+
+if (window) {
+    Object.assign(env, window.__env);
+}
+
+angular.module('app', ['ui.bootstrap',
+                       'app.core']);
+
+angular.module('app')
+       .constant('config', env);
+
+var configureLogging = function($logProvider, config) {
+    $logProvider.debugEnabled(config.enableDebug);
+}
+
+angular.module('app').config(configureLogging);
+
+// extend with angular.module('app').requires.push('...', '...');
+</script>
+
+{% block angular_requires %}{% endblock %}
+
+</head>
+<body ng-app="app" ng-cloak>
+{% block body_content %}
+{% endblock %}
+</body>
+</html>
