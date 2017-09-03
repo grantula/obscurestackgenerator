@@ -14,7 +14,7 @@ import os
 from flask import Flask
 
 # Local Imports
-from src.v1.routes import genericservice_v1
+from src.v1.routes import stack_options_v1
 
 
 def create_app():
@@ -25,7 +25,7 @@ def create_app():
     configure_logger(app)
     register_status_endpoint(app)
 
-    app.register_blueprint(genericservice_v1)
+    app.register_blueprint(stack_options_v1)
 
     return app
 

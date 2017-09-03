@@ -29,7 +29,7 @@ RUN apt-get update \
     && apt-get purge -y gcc gcc-4.9 cpp cpp-4.9 \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /usr/src/genericservice
-COPY src/genericservice/envconsul.hcl /etc/
+WORKDIR /usr/src/stackoptions-python
+COPY src/stackoptions-python/envconsul.hcl /etc/
 
 ENTRYPOINT ["/usr/local/bin/dumb-init", "--"]

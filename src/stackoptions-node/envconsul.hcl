@@ -5,5 +5,5 @@ prefix {
 }
 
 prefix {
-    path = "genericservice_service"
+    path = "stackoptionsnode_service"
 }

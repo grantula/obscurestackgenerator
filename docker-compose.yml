@@ -109,10 +109,10 @@ services:
             - SERVICE_80_CHECK_TIMEOUT=5s
             - SERVICE_80_NAME=obscurestackgenerator-staticassets
         command: ["python", "/usr/src/staticassets/init.py"]
-    service-genericservice:
+    service-stackoptions-python:
         build:
             context: .
-            dockerfile: src/genericservice/Dockerfile
+            dockerfile: src/stackoptions-python/Dockerfile
         networks:
             docker_container_network:
                 aliases:
@@ -121,14 +121,33 @@ services:
         expose:
             - "80"
         volumes:
-            - /vagrant/src/genericservice:/usr/src/genericservice
+            - /vagrant/src/stackoptions-python:/usr/src/stackoptions-python
         environment:
             - PYTHONUNBUFFERED=0
             - PYTHONPATH=/usr/src
             - CONSUL_ADDRESS=consul:8500
         labels:
-            - SERVICE_80_NAME=service-genericservice
+            - SERVICE_80_NAME=service-stackoptions-python
             - SERVICE_80_CHECK_HTTP=/status
             - SERVICE_80_CHECK_INTERVAL=5s
             - SERVICE_80_CHECK_TIMEOUT=5s
-        command: ["python", "/usr/src/genericservice/init.py"]
+        command: ["python", "/usr/src/stackoptions-python/init.py"]
+    service-stackoptions-node:
+        build:
+            context: .
+            dockerfile: src/stackoptions-node/Dockerfile
+        networks:
+            docker_container_network:
+                aliases:
+                    - consul
+        dns: 172.18.0.1
+        expose:
+            - "80"
+        environment:
+            - CONSUL_ADDRESS=consul:8500
+        labels:
+            - SERVICE_80_NAME=service-stackoptions-node
+            - SERVICE_80_CHECK_HTTP=/status
+            - SERVICE_80_CHECK_INTERVAL=5s
+            - SERVICE_80_CHECK_TIMEOUT=5s
+        command: ["npm", "start"]

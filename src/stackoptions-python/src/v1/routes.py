@@ -13,14 +13,14 @@ from flask import Blueprint
 from flask.views import MethodView
 
  # Local Imports
-from src.v1.endpoints.genericendpoint import GenericEndpoint
+from src.v1.endpoints.stackoptions import StackOptions
 
 
-genericservice_v1 = Blueprint('genericservice_v1', __name__, url_prefix="/v1")
+stack_options_v1 = Blueprint('stack_options_v1', __name__, url_prefix="/v1")
 
 ###########################
 ##### GenericEndpoint #####
 ###########################
 
-genericservice_v1.add_url_rule(GenericEndpoint.uri,
-        view_func=GenericEndpoint.as_view(GenericEndpoint.__name__))
+stack_options_v1.add_url_rule(StackOptions.uri,
+        view_func=StackOptions.as_view(StackOptions.__name__))
