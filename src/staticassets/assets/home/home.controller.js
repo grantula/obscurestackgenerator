@@ -15,11 +15,11 @@
 
         var vm = this;
 
-        vm.operatingSystems;
-        vm.backEnds;
-        vm.frontEnds;
-        vm.dataBases;
-        vm.servers;
+        vm.operatingSystem;
+        vm.backEnd;
+        vm.frontEnd;
+        vm.dataBase;
+        vm.server;
         vm.randomStack;
         vm.generateRandomStack = generateRandomStack;
 
@@ -37,6 +37,19 @@
                 'openbsd',
                 'suse',
                 'fedora'
+            ]
+
+            vm.database = [
+                'postgres',
+                'sql server',
+                'oracle',
+                'sqlite',
+                'mongodb',
+                'couchdb',
+                'dynamodb',
+                'redis',
+                'berkleydb',
+                'memcache'
             ]
 
             vm.backEnd = [
@@ -68,7 +81,8 @@
         }
 
         function generateRandomStack() {
-            var toDo = ['backEnd', 'frontEnd', 'server', 'operatingSystem'];
+            var toDo = ['backEnd', 'frontEnd', 'server', 'operatingSystem',
+                        'database'];
             var selections = {};
             for (var t in toDo) {
                 var current = toDo[t];
